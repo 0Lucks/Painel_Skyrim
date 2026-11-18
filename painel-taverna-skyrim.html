@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel da Taverna — Skyrim</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14110d; --panel:#221c15; --panel2:#2d251b; --gold:#d4af6a; --gold2:#a9843f;
+  --text:#eadfc8; --muted:#a99a7c; --ice:#8fc4d9; --blood:#b3402f; --ok:#6f9e5b;
+  --border:#5a4528;
+}
+body.contrast{ --bg:#000; --panel:#0b0b0b; --panel2:#151515; --gold:#ffe27a; --gold2:#ffd000; --text:#fff; --muted:#e0e0e0; --border:#ffe27a; }
+html{font-size:16px}
+body{background:var(--bg) radial-gradient(ellipse at top,#2a2117 0,var(--bg) 60%) no-repeat;color:var(--text);
+  font-family:'Crimson Text',Georgia,serif;font-size:1.15rem;min-height:100vh}
+h1,h2,h3,h4,.nord{font-family:'Cinzel',serif;color:var(--gold);letter-spacing:.04em}
+.skip{position:absolute;left:-999px;top:0;background:var(--gold);color:#000;padding:.5rem 1rem;z-index:99}
+.skip:focus{left:0}
+:focus-visible{outline:3px solid var(--ice)!important;outline-offset:2px}
+.topbar{background:linear-gradient(#1b150f,#120e0a);border-bottom:2px solid var(--gold2);padding:.6rem 1rem}
+.brand{font-size:1.7rem;margin:0}
+.clock{font-family:'Cinzel',serif;color:var(--text);text-align:right;line-height:1.15}
+.clock .time{font-size:1.8rem;color:var(--gold)}
+.tool-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.25rem .6rem}
+.tool-btn:hover{border-color:var(--gold)}
+.tool-btn[aria-pressed="true"]{background:var(--gold2);color:#000}
+select.form-select,input.form-control{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+select.form-select:focus,input.form-control:focus{background:var(--panel2);color:var(--text);border-color:var(--gold);box-shadow:none}
+.nav-tabs{border-bottom:1px solid var(--border)}
+.nav-tabs .nav-link{color:var(--muted);font-family:'Cinzel',serif;border:1px solid transparent;background:none}
+.nav-tabs .nav-link.active{background:var(--panel);color:var(--gold);border-color:var(--border) var(--border) var(--panel)}
+.nav-tabs .nav-link:hover{color:var(--gold)}
+.card-sk{background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 18px #0008;height:100%}
+.card-sk>.hd{padding:.6rem 1rem;border-bottom:1px solid var(--border);background:linear-gradient(#2d251b,#221c15);border-radius:10px 10px 0 0}
+.card-sk>.hd h2,.card-sk>.hd h3{margin:0;font-size:1.25rem}
+.card-sk>.bd{padding:1rem}
+.btn-sk{font-family:'Cinzel',serif;background:linear-gradient(#b99447,#8a6a2b);color:#17110a;border:1px solid var(--gold);font-weight:700;border-radius:6px}
+.btn-sk:hover{filter:brightness(1.12);color:#000}
+.btn-sk:disabled{opacity:.45}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid var(--gold2);font-family:'Cinzel',serif;border-radius:6px}
+.btn-ghost:hover{background:var(--gold2);color:#000}
+.btn-danger-sk{background:transparent;color:#ff8e7d;border:1px solid var(--blood);border-radius:6px}
+.btn-danger-sk:hover{background:var(--blood);color:#fff}
+/* Painel TV */
+.now{text-align:center;padding:1rem}
+.now .label{color:var(--muted);text-transform:uppercase;letter-spacing:.2em;font-size:.9rem}
+.now .code{font-family:'Cinzel',serif;font-size:clamp(4rem,11vw,8rem);font-weight:700;color:var(--gold);line-height:1;text-shadow:0 0 25px #d4af6a55}
+.now .code.flash{animation:pulse 1s ease 4}
+.now .who{font-size:2rem}
+.now .desk{font-family:'Cinzel',serif;color:var(--ice);font-size:1.5rem}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);color:#fff}}
+@media (prefers-reduced-motion:reduce){.now .code.flash{animation:none}.slide{transition:none!important}}
+.next-banner{background:#1b2a31;border:1px solid var(--ice);border-radius:8px;padding:.5rem 1rem;text-align:center;color:var(--ice)}
+.tk{display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:var(--panel2);border:1px solid var(--border);
+  border-radius:8px;padding:.35rem .8rem;margin-bottom:.4rem}
+.tk .c{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);min-width:5.5rem}
+.tk .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tk .m{color:var(--muted);font-size:.95rem;text-align:right}
+.tk.p1{border-left:4px solid var(--ice)} .tk.p2{border-left:4px solid var(--gold)}
+.badge-p{font-size:.75rem;background:var(--gold2);color:#000;border-radius:4px;padding:.05rem .4rem;font-family:'Cinzel',serif}
+.badge-p.p1{background:var(--ice)}
+.list-scroll{max-height:320px;overflow-y:auto}
+/* Carrossel */
+.slides{position:relative;min-height:230px}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity .8s;pointer-events:none;padding:.3rem}
+.slide.on{opacity:1;pointer-events:auto}
+.slide .tag{display:inline-block;font-family:'Cinzel',serif;font-size:.8rem;border:1px solid var(--gold2);color:var(--gold);border-radius:4px;padding:0 .5rem;margin-bottom:.4rem}
+.slide h3{font-size:1.5rem}
+.ticker{background:#0c0a07;border-top:1px solid var(--gold2);border-bottom:1px solid var(--gold2);overflow:hidden;white-space:nowrap}
+.ticker span{display:inline-block;padding-left:100%;animation:scroll 45s linear infinite;color:var(--gold)}
+@keyframes scroll{to{transform:translateX(-100%)}}
+.cat-btn{width:100%;text-align:left;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:.8rem 1rem;margin-bottom:.6rem;display:flex;gap:.8rem;align-items:center}
+.cat-btn:hover,.cat-btn.sel{border-color:var(--gold);background:#3a2f21}
+.cat-btn .ic{font-size:2rem}
+.cat-btn .ds{font-size:.95rem;color:var(--muted)}
+.star{font-size:2.2rem;background:none;border:none;color:#555;cursor:pointer;padding:0 .1rem}
+.star.on{color:var(--gold)}
+.stat{text-align:center;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.8rem}
+.stat .v{font-family:'Cinzel',serif;font-size:2rem;color:var(--gold)}
+.bar{height:14px;background:var(--gold2);border-radius:4px}
+.toast-sk{position:fixed;bottom:1rem;right:1rem;background:var(--panel);border:1px solid var(--gold);color:var(--text);padding:.7rem 1rem;border-radius:8px;z-index:100;display:none;max-width:320px}
+.form-label,label{color:var(--muted)}
+textarea.form-control{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+textarea.form-control:focus{background:var(--panel2);color:var(--text);border-color:var(--gold);box-shadow:none}
+footer{border-top:1px solid var(--border);color:var(--muted);font-size:.95rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Ir para o conteúdo</a>
+
+<header class="topbar">
+  <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div>
+      <h1 class="brand">⚔ <span id="brandName">Taverna</span></h1>
+      <div style="color:var(--muted)" data-i18n="tagline">Painel de Atendimento — Sempre há lugar junto à lareira</div>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <label for="branchSel" class="visually-hidden">Filial</label>
+      <select id="branchSel" class="form-select form-select-sm" style="width:auto"></select>
+      <button class="tool-btn" id="langBtn" aria-label="Mudar idioma / Change language">PT | EN</button>
+      <button class="tool-btn" id="fontDown" aria-label="Diminuir fonte">A−</button>
+      <button class="tool-btn" id="fontUp" aria-label="Aumentar fonte">A+</button>
+      <button class="tool-btn" id="contrastBtn" aria-pressed="false" data-i18n="contrast">Alto contraste</button>
+      <button class="tool-btn" id="soundBtn" aria-pressed="true">🔊</button>
+      <div class="clock"><div class="time" id="clockTime">--:--:--</div><div id="clockDate" style="font-size:.95rem;color:var(--muted)"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true"><span id="tickerText"></span></div>
+
+<main id="main" class="container-fluid mt-3">
+  <ul class="nav nav-tabs mb-3" role="tablist" id="tabs">
+    <li class="nav-item"><button class="nav-link active" data-tab="tvTab" data-i18n="tabTv">📜 Painel</button></li>
+    <li class="nav-item"><button class="nav-link" data-tab="recTab" data-i18n="tabRec">🍺 Recepção</button></li>
+    <li class="nav-item"><button class="nav-link" data-tab="deskTab" data-i18n="tabDesk">🛡 Balcão</button></li>
+    <li class="nav-item"><button class="nav-link" data-tab="fbTab" data-i18n="tabFb">⭐ Avaliação</button></li>
+    <li class="nav-item"><button class="nav-link" data-tab="statTab" data-i18n="tabStat">📊 Estatísticas</button></li>
+    <li class="nav-item"><button class="nav-link" data-tab="admTab" data-i18n="tabAdm">⚙ Mural</button></li>
+  </ul>
+
+  <!-- ================= PAINEL (TV) ================= -->
+  <section id="tvTab" class="tab-pane-sk">
+    <div class="row g-3">
+      <div class="col-lg-5">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="calling">Chamando agora</h2></div>
+          <div class="bd now" aria-live="assertive" aria-atomic="true">
+            <div class="label" data-i18n="ticketLbl">Senha</div>
+            <div class="code" id="nowCode">---</div>
+            <div class="who" id="nowName">&nbsp;</div>
+            <div class="desk" id="nowDesk">&nbsp;</div>
+          </div>
+          <div class="px-3 pb-3">
+            <div class="next-banner" id="nextBanner" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="lastCalled">Últimas chamadas</h2></div>
+          <div class="bd list-scroll" id="tvCalled"></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-sk">
+          <div class="hd d-flex justify-content-between align-items-center">
+            <h2 data-i18n="waiting">Na fila</h2>
+            <span id="waitInfo" style="color:var(--ice);font-size:1rem"></span>
+          </div>
+          <div class="bd list-scroll" id="tvQueue"></div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="board">Quadro da Taverna</h2></div>
+          <div class="bd"><div class="slides" id="slides" aria-live="off"></div></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="contactH">Contato & Horário</h2></div>
+          <div class="bd" id="contactBox"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RECEPÇÃO ================= -->
+  <section id="recTab" class="tab-pane-sk" hidden>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="pickTicket">Retire sua senha, viajante</h2></div>
+          <div class="bd">
+            <div id="catButtons"></div>
+            <div class="row g-2 mt-1">
+              <div class="col-md-7">
+                <label for="custName" data-i18n="yourName">Seu nome (opcional)</label>
+                <input id="custName" class="form-control" maxlength="24" placeholder="Ex.: Lydia">
+              </div>
+              <div class="col-md-5">
+                <label for="prioSel" data-i18n="priority">Prioridade</label>
+                <select id="prioSel" class="form-select">
+                  <option value="0" data-i18n="p0">Comum</option>
+                  <option value="1" data-i18n="p1">Idoso / Ferido</option>
+                  <option value="2" data-i18n="p2">Thane / Jarl</option>
+                </select>
+              </div>
+            </div>
+            <button id="genBtn" class="btn btn-sk btn-lg w-100 mt-3" disabled data-i18n="genBtn">Retirar senha</button>
+            <div id="ticketResult" class="mt-3 text-center" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-sk mb-3" style="height:auto">
+          <div class="hd"><h2 data-i18n="booking">Reservar mesa ou quarto</h2></div>
+          <div class="bd">
+            <div class="row g-2">
+              <div class="col-md-4"><label for="rvName" data-i18n="yourName">Nome</label><input id="rvName" class="form-control" maxlength="24"></div>
+              <div class="col-md-4"><label for="rvType" data-i18n="rvType">Tipo</label>
+                <select id="rvType" class="form-select"><option value="mesa">Mesa</option><option value="quarto">Quarto</option></select></div>
+              <div class="col-md-4"><label for="rvTime" data-i18n="rvTime">Horário</label><input id="rvTime" type="time" class="form-control"></div>
+            </div>
+            <button id="rvBtn" class="btn btn-ghost mt-2" data-i18n="rvBtn">Agendar</button>
+            <div id="rvList" class="mt-3"></div>
+          </div>
+        </div>
+        <div class="card-sk" style="height:auto">
+          <div class="hd"><h2 data-i18n="queueNow">Fila atual</h2></div>
+          <div class="bd list-scroll" id="recQueue"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BALCÃO ================= -->
+  <section id="deskTab" class="tab-pane-sk" hidden>
+    <div class="row g-3">
+      <div class="col-lg-5">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="deskCtl">Controle do atendente</h2></div>
+          <div class="bd">
+            <div class="row g-2">
+              <div class="col-6"><label for="deskSel" data-i18n="deskNum">Balcão</label>
+                <select id="deskSel" class="form-select"><option>1</option><option>2</option><option>3</option></select></div>
+              <div class="col-6"><label for="catFilter" data-i18n="catFilter">Categoria</label>
+                <select id="catFilter" class="form-select"></select></div>
+            </div>
+            <div class="d-grid gap-2 mt-3">
+              <button id="callNext" class="btn btn-sk btn-lg" data-i18n="callNext">Chamar próxima senha</button>
+              <button id="recall" class="btn btn-ghost" data-i18n="recall">Chamar novamente</button>
+              <button id="finish" class="btn btn-ghost" data-i18n="finish">Finalizar atendimento</button>
+              <button id="noShow" class="btn btn-danger-sk" data-i18n="noShow">Cliente ausente</button>
+            </div>
+            <hr style="border-color:var(--border)">
+            <label for="callSpecific" data-i18n="callSpecific">Chamar por nome ou número</label>
+            <div class="input-group">
+              <input id="callSpecific" class="form-control" placeholder="B-1001 / Lydia">
+              <button id="callSpecificBtn" class="btn btn-sk" data-i18n="call">Chamar</button>
+            </div>
+            <div class="mt-3" id="deskCurrent" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="queueNow">Fila atual</h2></div>
+          <div class="bd list-scroll" style="max-height:480px" id="deskQueue"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AVALIAÇÃO ================= -->
+  <section id="fbTab" class="tab-pane-sk" hidden>
+    <div class="row g-3 justify-content-center">
+      <div class="col-lg-6">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="fbTitle">Como foi o atendimento?</h2></div>
+          <div class="bd text-center">
+            <div id="stars" role="radiogroup" aria-label="Nota"></div>
+            <label for="fbText" class="mt-2" data-i18n="fbText">Deixe seu recado ao taberneiro</label>
+            <textarea id="fbText" class="form-control" rows="3" maxlength="200"></textarea>
+            <button id="fbBtn" class="btn btn-sk mt-3" data-i18n="fbBtn">Enviar avaliação</button>
+            <div id="fbMsg" class="mt-2" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ESTATÍSTICAS ================= -->
+  <section id="statTab" class="tab-pane-sk" hidden>
+    <div class="row g-3" id="statCards"></div>
+    <div class="row g-3 mt-1">
+      <div class="col-lg-6"><div class="card-sk"><div class="hd"><h2 data-i18n="byCat">Atendimentos por categoria</h2></div><div class="bd" id="statCat"></div></div></div>
+      <div class="col-lg-6"><div class="card-sk"><div class="hd"><h2 data-i18n="recentFb">Últimas avaliações</h2></div><div class="bd list-scroll" id="statFb"></div></div></div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button id="exportBtn" class="btn btn-ghost" data-i18n="exportBtn">Exportar histórico (CSV)</button>
+      <button id="resetBtn" class="btn btn-danger-sk" data-i18n="resetBtn">Zerar dados desta filial</button>
+    </div>
+  </section>
+
+  <!-- ================= MURAL (ADMIN / CONTROLE REMOTO) ================= -->
+  <section id="admTab" class="tab-pane-sk" hidden>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="admNews">Notícias e rumores (uma por linha)</h2></div>
+          <div class="bd"><textarea id="newsArea" class="form-control" rows="6"></textarea></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="admPromo">Promoções (uma por linha)</h2></div>
+          <div class="bd"><textarea id="promoArea" class="form-control" rows="6"></textarea></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="admInfo">Informações da filial</h2></div>
+          <div class="bd">
+            <label for="infoMission">Missão</label><textarea id="infoMission" class="form-control" rows="2"></textarea>
+            <label for="infoMenu" class="mt-2">Cardápio / Serviços</label><textarea id="infoMenu" class="form-control" rows="2"></textarea>
+            <label for="infoContact" class="mt-2">Contato (telefone, e-mail, endereço)</label><textarea id="infoContact" class="form-control" rows="2"></textarea>
+            <label for="infoHours" class="mt-2">Horário</label><input id="infoHours" class="form-control">
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-sk">
+          <div class="hd"><h2 data-i18n="admStyle">Aparência</h2></div>
+          <div class="bd">
+            <label for="styleName">Nome da taverna</label><input id="styleName" class="form-control">
+            <label for="styleGold" class="mt-2">Cor de destaque</label><input id="styleGold" type="color" class="form-control form-control-color">
+            <button id="admSave" class="btn btn-sk mt-3" data-i18n="admSave">Salvar e publicar no painel</button>
+            <div id="admMsg" class="mt-2" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="text-center py-3 mt-4" data-i18n="footer">Projeto acadêmico — inspirado no mundo de Skyrim. Abra a aba “Painel” em outra janela/TV: ela atualiza sozinha.</footer>
+<div class="toast-sk" id="toast" role="status"></div>
+
+<script>
+/* ============================================================
+   DADOS BÁSICOS
+   ============================================================ */
+const KEY = 'taverna_skyrim_v1';
+const CATS = {
+  B:{icon:'🍺', pt:'Hidromel & Bebidas', en:'Mead & Drinks',  dpt:'Hidromel, cerveja, vinho de Cyrodiil', den:'Mead, ale, Cyrodilic wine'},
+  R:{icon:'🍖', pt:'Refeições',          en:'Meals',          dpt:'Ensopado, queijo, torta de maçã',       den:'Stew, cheese, apple pie'},
+  H:{icon:'🛏️', pt:'Hospedagem',         en:'Lodging',        dpt:'Quartos e camas junto à lareira',       den:'Rooms and beds by the hearth'},
+  M:{icon:'📜', pt:'Contratos & Rumores',en:'Bounties & Rumors',dpt:'Missões, boatos e o bardo da casa',   den:'Quests, rumors and the house bard'}
+};
+const PRIO_ORDER = [2,1,0]; // Thane/Jarl > Idoso/Ferido > Comum
+
+const I18N = {
+  pt:{skip:'Ir para o conteúdo',tagline:'Painel de Atendimento — Sempre há lugar junto à lareira',contrast:'Alto contraste',
+    tabTv:'📜 Painel',tabRec:'🍺 Recepção',tabDesk:'🛡 Balcão',tabFb:'⭐ Avaliação',tabStat:'📊 Estatísticas',tabAdm:'⚙ Mural',
+    calling:'Chamando agora',ticketLbl:'Senha',lastCalled:'Últimas chamadas',waiting:'Na fila',board:'Quadro da Taverna',contactH:'Contato & Horário',
+    pickTicket:'Retire sua senha, viajante',yourName:'Seu nome (opcional)',priority:'Prioridade',p0:'Comum',p1:'Idoso / Ferido',p2:'Thane / Jarl',
+    genBtn:'Retirar senha',booking:'Reservar mesa ou quarto',rvType:'Tipo',rvTime:'Horário',rvBtn:'Agendar',queueNow:'Fila atual',
+    deskCtl:'Controle do atendente',deskNum:'Balcão',catFilter:'Categoria',callNext:'Chamar próxima senha',recall:'Chamar novamente',finish:'Finalizar atendimento',
+    noShow:'Cliente ausente',callSpecific:'Chamar por nome ou número',call:'Chamar',fbTitle:'Como foi o atendimento?',fbText:'Deixe seu recado ao taberneiro',
+    fbBtn:'Enviar avaliação',byCat:'Atendimentos por categoria',recentFb:'Últimas avaliações',exportBtn:'Exportar histórico (CSV)',resetBtn:'Zerar dados desta filial',
+    admNews:'Notícias e rumores (uma por linha)',admPromo:'Promoções (uma por linha)',admInfo:'Informações da filial',admStyle:'Aparência',admSave:'Salvar e publicar no painel',
+    footer:'Projeto acadêmico — inspirado no mundo de Skyrim. Abra a aba “Painel” em outra janela/TV: ela atualiza sozinha.',
+    // dinâmicos
+    allCats:'Todas as categorias',desk:'Balcão',none:'Ninguém na fila',nextUp:'Próxima a ser chamada',empty:'Fila vazia — a taverna está tranquila.',
+    waitAvg:'Espera média',min:'min',people:'na fila',estWait:'Espera estimada',yourTicket:'Sua senha',pos:'Posição na fila',
+    pickCat:'Escolha uma categoria',noCalled:'Nenhuma chamada ainda.',called:'chamou',noTicket:'Não há senhas para atender.',notFound:'Senha ou nome não encontrado na fila.',
+    served:'Atendidos hoje',total:'Senhas geradas',avgWait:'Espera média',avgRate:'Nota média',reservations:'Reservas',thanks:'Obrigado pela avaliação, viajante!',pickStar:'Escolha uma nota.',
+    saved:'Mural atualizado!',rvOk:'Reserva registrada.',rvFill:'Informe nome e horário.',confirmReset:'Zerar todos os dados desta filial?',absent:'ausente',
+    speakCall:(c,n,d)=>`Senha ${c.replace('-',' ')}${n?', '+n:''}. Dirija-se ao balcão ${d}.`,
+    mission:'Missão',menu:'Cardápio',contact:'Contato',hours:'Horário'},
+  en:{skip:'Skip to content',tagline:'Service Panel — There is always room by the hearth',contrast:'High contrast',
+    tabTv:'📜 Board',tabRec:'🍺 Reception',tabDesk:'🛡 Counter',tabFb:'⭐ Feedback',tabStat:'📊 Stats',tabAdm:'⚙ Notice board',
+    calling:'Now calling',ticketLbl:'Ticket',lastCalled:'Recent calls',waiting:'Waiting',board:'Tavern Board',contactH:'Contact & Hours',
+    pickTicket:'Take a ticket, traveler',yourName:'Your name (optional)',priority:'Priority',p0:'Regular',p1:'Elder / Wounded',p2:'Thane / Jarl',
+    genBtn:'Take ticket',booking:'Book a table or room',rvType:'Type',rvTime:'Time',rvBtn:'Book',queueNow:'Current queue',
+    deskCtl:'Attendant controls',deskNum:'Counter',catFilter:'Category',callNext:'Call next ticket',recall:'Call again',finish:'Finish service',
+    noShow:'Customer absent',callSpecific:'Call by name or number',call:'Call',fbTitle:'How was the service?',fbText:'Leave a note for the innkeeper',
+    fbBtn:'Send feedback',byCat:'Served by category',recentFb:'Recent feedback',exportBtn:'Export history (CSV)',resetBtn:'Reset this branch data',
+    admNews:'News and rumors (one per line)',admPromo:'Promotions (one per line)',admInfo:'Branch information',admStyle:'Appearance',admSave:'Save and publish to the board',
+    footer:'Academic project — inspired by the world of Skyrim. Open the “Board” tab on another window/TV: it updates by itself.',
+    allCats:'All categories',desk:'Counter',none:'Nobody waiting',nextUp:'Next to be called',empty:'Empty queue — the tavern is quiet.',
+    waitAvg:'Average wait',min:'min',people:'waiting',estWait:'Estimated wait',yourTicket:'Your ticket',pos:'Queue position',
+    pickCat:'Choose a category',noCalled:'No calls yet.',called:'called',noTicket:'No tickets to serve.',notFound:'Ticket or name not found in queue.',
+    served:'Served today',total:'Tickets issued',avgWait:'Average wait',avgRate:'Average rating',reservations:'Bookings',thanks:'Thank you for your feedback, traveler!',pickStar:'Pick a rating.',
+    saved:'Board updated!',rvOk:'Booking saved.',rvFill:'Enter name and time.',confirmReset:'Reset all data for this branch?',absent:'absent',
+    speakCall:(c,n,d)=>`Ticket ${c.replace('-',' ')}${n?', '+n:''}. Please go to counter ${d}.`,
+    mission:'Mission',menu:'Menu',contact:'Contact',hours:'Hours'}
+};
+
+const DEFAULTS = {
+  news:['Rumores: um dragão foi visto sobre as montanhas ao norte — viaje com cautela.',
+        'A Guarda da Cidade lembra: proibido brigar dentro da taverna (multas em septims).',
+        'O bardo da casa canta hoje à noite, depois do pôr do sol.',
+        'Chegaram caravanas com queijo fresco e hidromel de Honningbrew.'],
+  promos:['🍺 Happy Hour: 2 hidromeis pelo preço de 1, das 17h às 19h.',
+          '🛏️ Durma 3 noites e ganhe a 4ª por conta da casa.',
+          '🍖 Prato do dia: ensopado de veado com pão quente — 12 septims.'],
+  info:{mission:'Acolher todo viajante — de Thane a mercenário — com comida quente, bebida farta e uma boa história.',
+        menu:'Hidromel, cerveja, vinho · Ensopados, tortas, queijos · Quartos individuais e coletivos · Contratos e rumores',
+        contact:'Delvin Mallory · Proventus Avenicci · Neloth, s/n',
+        hours:'Todos os dias, 24h aberto'},
+  branches:['Valfolha — O Cavalo Branco','Riften — A Abelha e a Farpa','Solitude — O Skeever Piscante'],
+  brand:'O Cavalo Branco', gold:'#d4af6a'
+};
+
+let S = load();
+let ui = {lang:'pt', cat:null, stars:0, sound:true, lastCallStamp:0, fontScale:1};
+
+function newBranch(){return {counters:{B:1000,R:1000,H:1000,M:1000},queue:[],called:[],current:null,history:[],callTimes:[],feedback:[],reservations:[],stats:{total:0}}}
+function load(){
+  try{const r=JSON.parse(localStorage.getItem(KEY)); if(r&&r.branch) return r;}catch(e){}
+  const s={branch:DEFAULTS.branches[0],data:{},news:DEFAULTS.news.slice(),promos:DEFAULTS.promos.slice(),info:{...DEFAULTS.info},brand:DEFAULTS.brand,gold:DEFAULTS.gold,lastCall:0};
+  DEFAULTS.branches.forEach(b=>s.data[b]=newBranch());
+  return s;
+}
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
+const B = ()=>S.data[S.branch];
+const T = k=>I18N[ui.lang][k];
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id=>document.getElementById(id);
+const fmtTime = ts=>new Date(ts).toLocaleTimeString(ui.lang==='pt'?'pt-BR':'en-US',{hour:'2-digit',minute:'2-digit'});
+
+/* ============================================================
+   LÓGICA DE FILA
+   ============================================================ */
+function sortedQueue(cat){
+  return B().queue.filter(t=>!cat||t.cat===cat).slice().sort((a,b)=>{
+    const pa=PRIO_ORDER.indexOf(a.prio), pb=PRIO_ORDER.indexOf(b.prio);
+    return pa-pb || a.t-b.t;
+  });
+}
+function perTicketMin(){ // tempo médio entre chamadas (últimas 10); padrão 3 min
+  const c=B().callTimes.slice(-10); if(c.length<2) return 3;
+  let sum=0; for(let i=1;i<c.length;i++) sum+=c[i]-c[i-1];
+  return Math.min(15,Math.max(1,sum/(c.length-1)/60000));
+}
+function avgWaitMin(){
+  const w=B().history.slice(-20).map(h=>h.wait); if(!w.length) return 0;
+  return w.reduce((a,b)=>a+b,0)/w.length/60000;
+}
+function estimate(pos){ return Math.max(1,Math.round(perTicketMin()*pos)); }
+
+function generate(){
+  if(!ui.cat) return;
+  const b=B(); const n=++b.counters[ui.cat];
+  const tk={code:`${ui.cat}-${n}`,cat:ui.cat,name:$('custName').value.trim(),prio:+$('prioSel').value,t:Date.now()};
+  b.queue.push(tk); b.stats.total++;
+  save();
+  const pos=sortedQueue().findIndex(x=>x.code===tk.code)+1;
+  $('ticketResult').innerHTML=`<div class="nord" style="font-size:.95rem;color:var(--muted)">${T('yourTicket')}</div>
+    <div class="nord" style="font-size:3rem">${tk.code}</div>
+    <div>${T('pos')}: <b>${pos}</b> · ${T('estWait')}: <b>~${estimate(pos-1||1)} ${T('min')}</b></div>`;
+  $('custName').value=''; $('prioSel').value='0';
+  render();
+}
+
+function callTicket(tk){
+  const b=B(); const desk=$('deskSel').value;
+  // finaliza atendimento anterior deste balcão automaticamente
+  if(b.current && b.current.desk===desk) finishCurrent(true);
+  b.queue=b.queue.filter(x=>x.code!==tk.code);
+  const now=Date.now();
+  const rec={...tk,desk,calledAt:now};
+  b.current=rec; b.called.unshift(rec); b.called=b.called.slice(0,8);
+  b.callTimes.push(now); b.callTimes=b.callTimes.slice(-30);
+  b.history.push({code:tk.code,cat:tk.cat,name:tk.name,prio:tk.prio,desk,wait:now-tk.t,at:now,status:'ok'});
+  S.lastCall=now; save(); render(); announce(rec);
+}
+function callNext(){
+  const q=sortedQueue($('catFilter').value||null);
+  if(!q.length){toast(T('noTicket'));return;}
+  callTicket(q[0]);
+}
+function callSpecific(){
+  const v=$('callSpecific').value.trim().toLowerCase(); if(!v) return;
+  const tk=B().queue.find(t=>t.code.toLowerCase()===v||t.code.toLowerCase().endsWith('-'+v)||(t.name&&t.name.toLowerCase()===v));
+  if(!tk){toast(T('notFound'));return;}
+  $('callSpecific').value=''; callTicket(tk);
+}
+function recall(){ const c=B().current; if(!c) return; S.lastCall=Date.now(); save(); announce(c); render(); }
+function finishCurrent(silent){ if(!B().current) return; B().current=null; if(!silent){save();render();} }
+function noShow(){
+  const c=B().current; if(!c) return;
+  const h=[...B().history].reverse().find(x=>x.code===c.code); if(h) h.status='absent';
+  B().current=null; save(); render();
+}
+
+/* ============================================================
+   ANÚNCIO (som + voz)
+   ============================================================ */
+let actx;
+function chime(){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    [523,659,784].forEach((f,i)=>{
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(actx.destination);
+      const t=actx.currentTime+i*.18; g.gain.setValueAtTime(.0001,t);
+      g.gain.exponentialRampToValueAtTime(.25,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+.5);
+      o.start(t);o.stop(t+.55);
+    });
+  }catch(e){}
+}
+function announce(rec){
+  if(!ui.sound) return;
+  chime();
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(T('speakCall')(rec.code,rec.name,rec.desk));
+    u.lang=ui.lang==='pt'?'pt-BR':'en-US'; u.rate=.9;
+    setTimeout(()=>speechSynthesis.speak(u),700);
+  }
+}
+
+/* ============================================================
+   RENDERIZAÇÃO
+   ============================================================ */
+function ticketRow(t,i,showEst){
+  const p=t.prio?`<span class="badge-p p${t.prio}">${T('p'+t.prio)}</span>`:'';
+  return `<div class="tk p${t.prio}"><span class="c">${CATS[t.cat].icon} ${esc(t.code)}</span>
+    <span class="n">${esc(t.name)||'&nbsp;'} ${p}</span>
+    <span class="m">${showEst?`~${estimate(i+1)} ${T('min')}`:fmtTime(t.t)}</span></div>`;
+}
+function render(){
+  const b=B(), q=sortedQueue();
+  document.documentElement.lang=ui.lang==='pt'?'pt-BR':'en';
+  document.querySelectorAll('[data-i18n]').forEach(e=>{const v=T(e.dataset.i18n); if(typeof v==='string') e.textContent=v;});
+  $('brandName').textContent=S.brand; document.title=`${S.brand} — ${S.branch}`;
+  document.documentElement.style.setProperty('--gold',S.gold);
+
+  // painel TV
+  const cur=b.current;
+  $('nowCode').textContent=cur?cur.code:'---';
+  $('nowName').innerHTML=cur&&cur.name?esc(cur.name):'&nbsp;';
+  $('nowDesk').textContent=cur?`${T('desk')} ${cur.desk}`:' ';
+  if(S.lastCall && S.lastCall!==ui.lastCallStamp){
+    ui.lastCallStamp=S.lastCall; const c=$('nowCode'); c.classList.remove('flash'); void c.offsetWidth; if(cur) c.classList.add('flash');
+  }
+  $('nextBanner').innerHTML=q.length?`🔔 ${T('nextUp')}: <b class="nord">${esc(q[0].code)}</b>${q[0].name?' — '+esc(q[0].name):''}`:esc(T('empty'));
+  $('tvCalled').innerHTML=b.called.length?b.called.map(c=>`<div class="tk"><span class="c">${esc(c.code)}</span><span class="n">${esc(c.name)}</span><span class="m">${T('desk')} ${c.desk}<br>${fmtTime(c.calledAt)}</span></div>`).join(''):`<div style="color:var(--muted)">${T('noCalled')}</div>`;
+  $('tvQueue').innerHTML=q.length?q.slice(0,12).map((t,i)=>ticketRow(t,i,true)).join(''):`<div style="color:var(--muted)">${T('none')}</div>`;
+  $('waitInfo').textContent=`${q.length} ${T('people')} · ${T('waitAvg')}: ${Math.round(avgWaitMin())||'—'} ${T('min')}`;
+  $('contactBox').innerHTML=`<p><b class="nord" style="font-size:.9rem">${T('mission')}</b><br>${esc(S.info.mission)}</p>
+    <p><b class="nord" style="font-size:.9rem">${T('menu')}</b><br>${esc(S.info.menu)}</p>
+    <p><b class="nord" style="font-size:.9rem">${T('contact')}</b><br>${esc(S.info.contact)}</p>
+    <p class="mb-0"><b class="nord" style="font-size:.9rem">${T('hours')}</b><br>${esc(S.info.hours)}</p>`;
+  $('tickerText').textContent='⚔  '+S.news.join('   ⚔   ');
+
+  // recepção
+  $('catButtons').innerHTML=Object.keys(CATS).map(k=>`<button class="cat-btn ${ui.cat===k?'sel':''}" data-cat="${k}" aria-pressed="${ui.cat===k}">
+    <span class="ic">${CATS[k].icon}</span><span><b class="nord">${CATS[k][ui.lang]}</b><br><span class="ds">${CATS[k]['d'+ui.lang]}</span></span></button>`).join('');
+  $('genBtn').disabled=!ui.cat;
+  $('recQueue').innerHTML=q.length?q.map((t,i)=>ticketRow(t,i,true)).join(''):`<div style="color:var(--muted)">${T('none')}</div>`;
+  $('rvList').innerHTML=b.reservations.slice().sort((a,c)=>a.time.localeCompare(c.time)).map(r=>`<div class="tk"><span class="c">${r.type==='quarto'?'🛏️':'🍽️'} ${esc(r.time)}</span><span class="n">${esc(r.name)}</span><span class="m">${esc(r.type)}</span></div>`).join('');
+
+  // balcão
+  const cf=$('catFilter'), prev=cf.value;
+  cf.innerHTML=`<option value="">${T('allCats')}</option>`+Object.keys(CATS).map(k=>`<option value="${k}">${CATS[k].icon} ${CATS[k][ui.lang]}</option>`).join(''); cf.value=prev;
+  $('deskQueue').innerHTML=q.length?q.map((t,i)=>ticketRow(t,i,false)).join(''):`<div style="color:var(--muted)">${T('empty')}</div>`;
+  $('deskCurrent').innerHTML=cur?`<div class="tk p2"><span class="c">${esc(cur.code)}</span><span class="n">${esc(cur.name)}</span><span class="m">${T('desk')} ${cur.desk}</span></div>`:'';
+
+  renderStats();
+}
+function renderStats(){
+  const b=B(), ok=b.history.filter(h=>h.status==='ok'), r=b.feedback;
+  const avgR=r.length?(r.reduce((a,x)=>a+x.stars,0)/r.length).toFixed(1):'—';
+  const cards=[[T('total'),b.stats.total],[T('served'),ok.length],[T('avgWait'),`${Math.round(avgWaitMin())||0} ${T('min')}`],[T('avgRate'),avgR+(r.length?' ★':'')],[T('reservations'),b.reservations.length]];
+  $('statCards').innerHTML=cards.map(c=>`<div class="col-6 col-lg"><div class="stat"><div class="v">${c[1]}</div><div style="color:var(--muted)">${c[0]}</div></div></div>`).join('');
+  const max=Math.max(1,...Object.keys(CATS).map(k=>ok.filter(h=>h.cat===k).length));
+  $('statCat').innerHTML=Object.keys(CATS).map(k=>{const n=ok.filter(h=>h.cat===k).length;
+    return `<div class="mb-2">${CATS[k].icon} ${CATS[k][ui.lang]} — <b>${n}</b><div class="bar" style="width:${n/max*100}%"></div></div>`}).join('');
+  $('statFb').innerHTML=r.slice(-8).reverse().map(f=>`<div class="tk"><span class="c">${'★'.repeat(f.stars)}</span><span class="n" style="white-space:normal">${esc(f.text)||'&nbsp;'}</span><span class="m">${fmtTime(f.t)}</span></div>`).join('');
+}
+
+/* ============================================================
+   CARROSSEL (notícias + promoções + info)
+   ============================================================ */
+let slideIdx=0;
+function buildSlides(){
+  const items=[
+    ...S.news.map(t=>({tag:'📰 '+(ui.lang==='pt'?'Notícias':'News'),title:t})),
+    ...S.promos.map(t=>({tag:'🎁 '+(ui.lang==='pt'?'Promoção':'Promo'),title:t})),
+    {tag:'🏰 '+S.branch,title:S.info.mission}
+  ];
+  $('slides').innerHTML=items.map((s,i)=>`<div class="slide ${i===0?'on':''}"><span class="tag">${esc(s.tag)}</span><h3>${esc(s.title)}</h3></div>`).join('');
+  slideIdx=0;
+}
+setInterval(()=>{
+  const el=document.querySelectorAll('#slides .slide'); if(el.length<2) return;
+  el[slideIdx].classList.remove('on'); slideIdx=(slideIdx+1)%el.length; el[slideIdx].classList.add('on');
+},6000);
+
+/* ============================================================
+   RELÓGIO
+   ============================================================ */
+function tick(){
+  const d=new Date(), loc=ui.lang==='pt'?'pt-BR':'en-US';
+  $('clockTime').textContent=d.toLocaleTimeString(loc);
+  $('clockDate').textContent=d.toLocaleDateString(loc,{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+setInterval(tick,1000); tick();
+setInterval(()=>{ if($('tvTab').hidden===false){ $('waitInfo').textContent=`${B().queue.length} ${T('people')} · ${T('waitAvg')}: ${Math.round(avgWaitMin())||'—'} ${T('min')}`; } },15000);
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3000);}
+
+document.querySelectorAll('#tabs .nav-link').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('#tabs .nav-link').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.querySelectorAll('.tab-pane-sk').forEach(p=>p.hidden=true); $(btn.dataset.tab).hidden=false;
+  if(btn.dataset.tab==='admTab') fillAdmin();
+}));
+$('catButtons').addEventListener('click',e=>{const b=e.target.closest('.cat-btn'); if(!b) return; ui.cat=b.dataset.cat; render();});
+$('genBtn').onclick=generate;
+$('callNext').onclick=callNext; $('recall').onclick=recall; $('finish').onclick=()=>finishCurrent(false); $('noShow').onclick=noShow;
+$('callSpecificBtn').onclick=callSpecific; $('callSpecific').addEventListener('keydown',e=>{if(e.key==='Enter')callSpecific();});
+
+$('rvBtn').onclick=()=>{
+  const n=$('rvName').value.trim(), t=$('rvTime').value; if(!n||!t){toast(T('rvFill'));return;}
+  B().reservations.push({name:n,time:t,type:$('rvType').value}); save(); $('rvName').value=''; $('rvTime').value=''; toast(T('rvOk')); render();
+};
+
+// estrelas
+$('stars').innerHTML=[1,2,3,4,5].map(n=>`<button class="star" role="radio" aria-checked="false" aria-label="${n}" data-n="${n}">★</button>`).join('');
+$('stars').addEventListener('click',e=>{const s=e.target.closest('.star'); if(!s) return; ui.stars=+s.dataset.n;
+  document.querySelectorAll('.star').forEach(x=>{const on=+x.dataset.n<=ui.stars; x.classList.toggle('on',on); x.setAttribute('aria-checked',+x.dataset.n===ui.stars);});});
+$('fbBtn').onclick=()=>{
+  if(!ui.stars){$('fbMsg').textContent=T('pickStar');return;}
+  B().feedback.push({stars:ui.stars,text:$('fbText').value.trim(),t:Date.now()}); save();
+  ui.stars=0; $('fbText').value=''; document.querySelectorAll('.star').forEach(x=>x.classList.remove('on'));
+  $('fbMsg').textContent=T('thanks'); render();
+};
+
+// admin
+function fillAdmin(){
+  $('newsArea').value=S.news.join('\n'); $('promoArea').value=S.promos.join('\n');
+  $('infoMission').value=S.info.mission; $('infoMenu').value=S.info.menu; $('infoContact').value=S.info.contact; $('infoHours').value=S.info.hours;
+  $('styleName').value=S.brand; $('styleGold').value=S.gold;
+}
+$('admSave').onclick=()=>{
+  const lines=v=>v.split('\n').map(s=>s.trim()).filter(Boolean);
+  S.news=lines($('newsArea').value); S.promos=lines($('promoArea').value);
+  S.info={mission:$('infoMission').value,menu:$('infoMenu').value,contact:$('infoContact').value,hours:$('infoHours').value};
+  S.brand=$('styleName').value||DEFAULTS.brand; S.gold=$('styleGold').value;
+  save(); buildSlides(); render(); $('admMsg').textContent=T('saved');
+};
+
+// stats actions
+$('resetBtn').onclick=()=>{ if(confirm(T('confirmReset'))){ S.data[S.branch]=newBranch(); save(); render(); } };
+$('exportBtn').onclick=()=>{
+  const rows=[['codigo','categoria','nome','prioridade','balcao','espera_min','hora','status'],
+    ...B().history.map(h=>[h.code,h.cat,h.name,h.prio,h.desk,(h.wait/60000).toFixed(1),new Date(h.at).toISOString(),h.status])];
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'})); a.download='historico-taverna.csv'; a.click();
+};
+
+// topo
+$('branchSel').innerHTML=S.branch&&Object.keys(S.data).map(b=>`<option>${esc(b)}</option>`).join(''); $('branchSel').value=S.branch;
+$('branchSel').onchange=e=>{S.branch=e.target.value; save(); buildSlides(); render();};
+$('langBtn').onclick=()=>{ui.lang=ui.lang==='pt'?'en':'pt'; buildSlides(); render(); tick();};
+$('contrastBtn').onclick=e=>{const on=document.body.classList.toggle('contrast'); e.currentTarget.setAttribute('aria-pressed',on);};
+$('soundBtn').onclick=e=>{ui.sound=!ui.sound; e.currentTarget.setAttribute('aria-pressed',ui.sound); e.currentTarget.textContent=ui.sound?'🔊':'🔇'; if(ui.sound) chime();};
+const setFont=d=>{ui.fontScale=Math.min(1.6,Math.max(.8,ui.fontScale+d)); document.documentElement.style.fontSize=(16*ui.fontScale)+'px';};
+$('fontUp').onclick=()=>setFont(.1); $('fontDown').onclick=()=>setFont(-.1);
+
+// sincroniza várias abas/janelas (ex.: balcão em um PC, painel na TV)
+window.addEventListener('storage',e=>{
+  if(e.key!==KEY||!e.newValue) return;
+  const prevCall=S.lastCall; S=JSON.parse(e.newValue);
+  render();
+  if(S.lastCall!==prevCall && B().current && $('tvTab').hidden===false) announce(B().current);
+});
+
+/* init */
+buildSlides(); render();
+</script>
+</body>
+</html>
